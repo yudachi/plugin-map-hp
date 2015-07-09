@@ -28,8 +28,8 @@ mapName = [
 ]
 module.exports =
   name: 'map-hp'
-  priority: 1
-  displayName: [<FontAwesome key={0} name='compass' />, ' 海域血量']
+  priority: 8
+  displayName: [<FontAwesome key={0} name='heart' />, ' 海域血量']
   description: '海域血量'
   version: '1.0.0'
   author: 'Chiba'
@@ -56,7 +56,7 @@ module.exports =
 
     render: ->
       <div>
-        <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'map-hp.css')} />``
+        <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'map-hp.css')} />
         <Table>
           <tbody>
           {
@@ -67,7 +67,7 @@ module.exports =
               tmpRes = tmpMax - tmpMap[1]
               [
                 <tr key={i * 2}>
-                  <td>{mapName[parseInt(mpMap[0] / 10) - 1][tmpMap[0] % 10 - 1]}</td>
+                  <td>{mapName[parseInt(tmpMap[0] / 10) - 1][tmpMap[0] % 10 - 1]}</td>
                 </tr>
                 <tr key={i * 2 + 1}>
                   <td className="hp-progress">
