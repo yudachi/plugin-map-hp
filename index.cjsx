@@ -76,7 +76,7 @@ module.exports =
                   for info, i in @state.mapHp
                     [id, now, max] = info
                     res = max - now
-                    continue if ((@state.clearedVisible == false) && (res == 0))
+                    continue if (((@state.clearedVisible == false) && (res == 0)) || ((@state.clearedVisible == true) && (id % 10 < 5)))
                     [
                       <tr key={i * 2}>
                         <td>
