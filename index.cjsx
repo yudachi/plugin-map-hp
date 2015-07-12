@@ -26,6 +26,8 @@ mapName = [
   ["5-1 南方海域前面", "5-2 珊瑚諸島沖", "5-3 サブ島沖海域", "5-4 サーモン海域", "5-5 [Extra] サーモン海域北方"],
   ["6-1 中部海域哨戒線", "6-2 MS諸島沖", "6-3 グアノ環礁沖海域"]
 ]
+mapAll = []
+mapUncleared = []
 module.exports =
   name: 'map-hp'
   priority: 8
@@ -37,19 +39,37 @@ module.exports =
   reactClass: React.createClass
     getInitialState: ->
       mapHp: []
+      clearedVisible: false
     handleResponse: (e) ->
       {method, path, body, postBody} = e.detail
       flag = false
-      mapHp = []
+      mapAll = []
+      mapUncleared = []
       switch path
         when '/kcsapi/api_get_member/mapinfo'
           for mapInfo in body
+            if mapInfo.api_id % 5 == 0 or (mapInfo.api_id + 4) % 10 == 0 or mapInfo.api_exboss_flag == 1
+              mapAll.push [mapInfo.api_id, mapInfo.api_defeat_count]
             if mapInfo.api_exboss_flag == 1
-              mapHp.push [mapInfo.api_id, mapInfo.api_defeat_count]
+              mapUncleared.push [mapInfo.api_id, mapInfo.api_defeat_count]
           flag = true
       return unless flag
-      @setState
-        mapHp: mapHp
+      if @state.clearedVisible
+        @setState
+          mapHp: mapAll
+      else
+        @setState
+          mapHp: mapUncleared
+
+    handleSetClearedVisible: ->
+      if @state.clearedVisible
+        @setState
+          mapHp: mapUncleared
+          clearedVisible: false
+      else
+        @setState
+          mapHp: mapAll
+          clearedVisible: true
 
     componentDidMount: ->
       window.addEventListener 'game.response', @handleResponse
@@ -57,6 +77,9 @@ module.exports =
     render: ->
       <div>
         <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'map-hp.css')} />
+        <div style={display: 'flex', marginLeft: 15, marginRight: 15}>
+        <Input type='checkbox' ref='clearedVisible' label='显示已攻略EX图' checked={@state.clearedVisible} onClick={@handleSetClearedVisible} />
+        </div>        
         <Table>
           <tbody>
           {
