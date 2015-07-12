@@ -29,6 +29,7 @@ module.exports =
   reactClass: React.createClass
     getInitialState: ->
       mapHp: []
+      clearedVisible: false
     handleResponse: (e) ->
       {method, path, body, postBody} = e.detail
       flag = false
@@ -46,6 +47,14 @@ module.exports =
       return unless flag
       @setState
         mapHp: mapHp
+    handleSetClickValue: ->
+      if @state.clearedVisible == false
+        @setState
+          clearedVisible: true
+      else
+        @setState
+          clearedVisible: false
+
     componentDidMount: ->
       window.addEventListener 'game.response', @handleResponse
     componentWillUnmount: ->
@@ -57,31 +66,37 @@ module.exports =
           if @state.mapHp.length == 0
             <div>点击出击后才能获得数据</div>
           else
-            <Table>
-              <tbody>
-              {
-                for info, i in @state.mapHp
-                  [id, now, max] = info
-                  res = max - now
-                  [
-                    <tr key={i * 2}>
-                      <td>
-                        {if id % 10 > 4 then '[Extra] ' else '[Normal] '}
-                        {id // 10}-{id % 10}
-                        {' ' + $maps[id].api_name}
-                      </td>
-                    </tr>
-                    <tr key={i * 2 + 1}>
-                      <td className="hp-progress">
-                        <ProgressBar bsStyle={getHpStyle res / max * 100}
-                                     now={res / max * 100}
-                                     label={"#{res} / #{max}"}
-                        />
-                      </td>
-                    </tr>
-                  ]
-              }
-              </tbody>
-            </Table>
+            <div>
+              <div style={display: 'flex', marginLeft: 15, marginRight: 15}>
+                <Input type='checkbox' ref='clearedVisible' label='显示已攻略EX图' checked={@state.clearedVisible} onClick={@handleSetClickValue} />
+              </div>
+              <Table>
+                <tbody>
+                {
+                  for info, i in @state.mapHp
+                    [id, now, max] = info
+                    res = max - now
+                    continue if ((@state.clearedVisible == false) && (res == 0))
+                    [
+                      <tr key={i * 2}>
+                        <td>
+                          {if id % 10 > 4 then '[Extra] ' else '[Normal] '}
+                          {id // 10}-{id % 10}
+                          {' ' + $maps[id].api_name}
+                        </td>
+                      </tr>
+                      <tr key={i * 2 + 1}>
+                        <td className="hp-progress">
+                          <ProgressBar bsStyle={getHpStyle res / max * 100}
+                                       now={res / max * 100}
+                                       label={"#{res} / #{max}"}
+                          />
+                        </td>
+                      </tr>
+                    ]
+                }
+                </tbody>
+              </Table>
+            </div>
         }
       </div>
