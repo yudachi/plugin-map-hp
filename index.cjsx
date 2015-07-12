@@ -43,10 +43,10 @@ module.exports =
     handleResponse: (e) ->
       {method, path, body, postBody} = e.detail
       flag = false
-      mapAll = []
-      mapUncleared = []
       switch path
         when '/kcsapi/api_get_member/mapinfo'
+          mapAll = []
+          mapUncleared = []
           for mapInfo in body
             if mapInfo.api_id % 5 == 0 or (mapInfo.api_id + 4) % 10 == 0 or mapInfo.api_exboss_flag == 1
               mapAll.push [mapInfo.api_id, mapInfo.api_defeat_count]
