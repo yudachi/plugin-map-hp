@@ -21,7 +21,7 @@ getHpStyle = (percent) ->
 module.exports =
   name: 'map-hp'
   priority: 8
-  displayName: [<FontAwesome key={0} name='heart' />, ' 海域血量']
+  displayName: <span><FontAwesome key={0} name='heart' /> 海域血量</span>
   description: '海域血量'
   version: '1.0.0'
   author: 'Chiba'
