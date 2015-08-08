@@ -2,10 +2,24 @@ Promise = require 'bluebird'
 async = Promise.coroutine
 request = Promise.promisifyAll require('request')
 {relative, join} = require 'path-extra'
+path = require 'path-extra'
 fs = require 'fs-extra'
 {_, $, $$, React, ReactBootstrap, ROOT, resolveTime, layout, toggleModal} = window
 {Table, ProgressBar, Grid, Input, Col, Alert} = ReactBootstrap
 {APPDATA_PATH, SERVER_HOSTNAME} = window
+
+i18n = require './node_modules/i18n'
+{__} = i18n
+
+i18n.configure
+  locales: ['en_US', 'ja_JP', 'zh_CN']
+  defaultLocale: 'en_US'
+  directory: path.join(__dirname, 'assets', 'i18n')
+  updateFiles: false
+  indent: '\t'
+  extension: '.json'
+i18n.setLocale(window.language)
+
 
 window.addEventListener 'layout.change', (e) ->
   {layout} = e.detail
@@ -21,8 +35,8 @@ getHpStyle = (percent) ->
 module.exports =
   name: 'map-hp'
   priority: 8
-  displayName: <span><FontAwesome key={0} name='heart' /> 海域血量</span>
-  description: '海域血量'
+  displayName: <span><FontAwesome key={0} name='heart' />{' ' + __("Map-HP")}</span>
+  description: __("Map-HP")
   version: '1.0.0'
   author: 'Chiba'
   link: 'https://github.com/Chibaheit'
@@ -64,11 +78,11 @@ module.exports =
         <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'map-hp.css')} />
         {
           if @state.mapHp.length == 0
-            <div>点击出击后才能获得数据</div>
+            <div>{__("Click Sortie to get infromation")}</div>
           else
             <div>
               <div style={display: 'flex', marginLeft: 15, marginRight: 15}>
-                <Input type='checkbox' ref='clearedVisible' label='显示已攻略EX图' checked={@state.clearedVisible} onClick={@handleSetClickValue} />
+                <Input type='checkbox' ref='clearedVisible' label={__("Show captured E0 map")} checked={@state.clearedVisible} onClick={@handleSetClickValue} />
               </div>
               <Table>
                 <tbody>
