@@ -51,6 +51,13 @@ module.exports =
       switch path
         when '/kcsapi/api_get_member/mapinfo'
           for mapInfo in body
+            continue unless mapInfo.api_eventmap?
+            now = if mapInfo.api_cleared > 0
+              mapInfo.api_eventmap.api_max_maphp
+            else
+              mapInfo.api_eventmap.api_max_maphp - mapInfo.api_eventmap.api_now_maphp
+            mapHp.push [mapInfo.api_id, now, mapInfo.api_eventmap.api_max_maphp]
+          for mapInfo in body
             continue unless $maps[mapInfo.api_id].api_required_defeat_count
             now = if mapInfo.api_defeat_count?
               mapInfo.api_defeat_count
@@ -94,7 +101,7 @@ module.exports =
                     [
                       <tr key={i * 2}>
                         <td>
-                          {if id % 10 > 4 then '[Extra] ' else '[Normal] '}
+                          {if id // 10 > 20 then '[Event] ' else (if id % 10 > 4 then '[Extra] ' else '[Normal] ')}
                           {id // 10}-{id % 10}
                           {' ' + $maps[id].api_name}
                         </td>
