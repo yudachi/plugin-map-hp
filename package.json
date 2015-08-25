@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/poooi/plugin-map-hp/issues"
   },
-  "homepage": "https://github.com/poooi/plugin-map-hp#readme"
+  "homepage": "https://github.com/poooi/plugin-map-hp#readme",
+  "dependencies": {
+    "i18n": "^0.5.0"
+  }
 }

@@ -8,7 +8,7 @@ fs = require 'fs-extra'
 {Table, ProgressBar, Grid, Input, Col, Alert} = ReactBootstrap
 {APPDATA_PATH, SERVER_HOSTNAME} = window
 
-i18n = require './node_modules/i18n'
+i18n = require 'i18n'
 {__} = i18n
 
 i18n.configure
