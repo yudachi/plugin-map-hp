@@ -89,7 +89,7 @@ module.exports =
           else
             <div>
               <div style={display: 'flex', marginLeft: 15, marginRight: 15}>
-                <Input type='checkbox' ref='clearedVisible' label={__("Show captured E0 map")} checked={@state.clearedVisible} onClick={@handleSetClickValue} />
+                <Input type='checkbox' ref='clearedVisible' label={__("Show cleared EO map")} checked={@state.clearedVisible} onClick={@handleSetClickValue} />
               </div>
               <Table>
                 <tbody>
