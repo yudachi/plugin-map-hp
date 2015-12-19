@@ -8,18 +8,15 @@ fs = require 'fs-extra'
 {Table, ProgressBar, Grid, Input, Col, Alert} = ReactBootstrap
 {APPDATA_PATH, SERVER_HOSTNAME} = window
 
-i18n = require 'i18n'
-{__} = i18n
-
-i18n.configure
+window.i18n.mapHP = new(require 'i18n-2')
   locales: ['en-US', 'ja-JP', 'zh-CN']
   defaultLocale: 'zh-CN'
   directory: path.join(__dirname, 'assets', 'i18n')
   updateFiles: false
   indent: '\t'
   extension: '.json'
-i18n.setLocale(window.language)
-
+window.i18n.mapHP.setLocale(window.language)
+__ = window.i18n.mapHP.__.bind(window.i18n.mapHP)
 
 window.addEventListener 'layout.change', (e) ->
   {layout} = e.detail
