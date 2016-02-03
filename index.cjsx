@@ -38,6 +38,11 @@ module.exports =
   author: 'Chiba'
   link: 'https://github.com/Chibaheit'
   reactClass: React.createClass
+    mapRanks: ['', " #{window.i18n.others.__ '丙'}", " #{window.i18n.others.__ '乙'}", " #{window.i18n.others.__ '甲'}"]
+    realMapRanks: ['', '-C', '-B', '-A']
+    finalHP: fs.readJsonSync path.join __dirname, 'assets', 'finalHP.json'
+    mapName: 'NaN'
+    nextSpot: 'NaN'
     getInitialState: ->
       mapHp: []
       clearedVisible: false
@@ -61,10 +66,40 @@ module.exports =
             else
               $maps[mapInfo.api_id].api_required_defeat_count
             mapHp.push [mapInfo.api_id, now, $maps[mapInfo.api_id].api_required_defeat_count]
-          flag = true
-      return unless flag
-      @setState
-        mapHp: mapHp
+          @setState
+            mapHp: mapHp
+        when '/kcsapi/api_req_map/start'
+          @mapName = "#{body.api_maparea_id}-#{body.api_mapinfo_no}"
+          realMapName = "#{body.api_maparea_id}-#{body.api_mapinfo_no}"
+          mapId = "#{body.api_maparea_id}#{body.api_mapinfo_no}"
+          @nextSpot = body.api_no
+          if window._eventMapRanks?[mapId]?
+            @mapName += @mapRanks[window._eventMapRanks[mapId]]
+            realMapName += @realMapRanks[window._eventMapRanks[mapId]]
+          if @finalHP[realMapName]?
+            if body.api_eventmap.api_now_maphp <= @finalHP[realMapName] && body.api_eventmap.api_now_maphp > 0
+              @mapName += __ 'Final'
+              event = new CustomEvent 'poi.map-reminder',
+                bubbles: true
+                cancelable: true
+                detail:
+                  mapdetail: "#{window.i18n.others.__ 'Sortie area'}: #{@mapName}"
+              window.dispatchEvent event
+        when '/kcsapi/api_req_map/next'
+          @nextSpot = body.api_no
+          event = new CustomEvent 'poi.map-reminder',
+            bubbles: true
+            cancelable: true
+            detail:
+              mapdetail: "#{window.i18n.others.__ 'Sortie area'}: #{@mapName}"
+          window.dispatchEvent event
+        when '/kcsapi/api_req_sortie/airbattle', '/kcsapi/api_req_battle_midnight/sp_midnight', '/kcsapi/api_req_sortie/battle', '/kcsapi/api_req_battle_midnight/battle', '/kcsapi/api_req_combined_battle/airbattle', '/kcsapi/api_req_combined_battle/sp_midnight', '/kcsapi/api_req_combined_battle/battle', '/kcsapi/api_req_combined_battle/battle_water', '/kcsapi/api_req_combined_battle/midnight_battle'
+          event = new CustomEvent 'poi.map-reminder',
+            bubbles: true
+            cancelable: true
+            detail:
+              mapdetail: "#{window.i18n.others.__ 'Sortie area'}: #{@mapName} (#{@nextSpot})"
+          window.dispatchEvent event
     handleSetClickValue: ->
       if @state.clearedVisible == false
         @setState
