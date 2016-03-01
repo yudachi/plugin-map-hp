@@ -34,7 +34,7 @@ module.exports =
   priority: 8
   displayName: <span><FontAwesome key={0} name='heart' />{' ' + __("Map HP")}</span>
   description: __("Map HP")
-  version: '1.4.1'
+  version: '1.4.2'
   author: 'Chiba'
   link: 'https://github.com/Chibaheit'
   reactClass: React.createClass
