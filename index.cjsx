@@ -76,7 +76,7 @@ module.exports =
           if window._eventMapRanks?[mapId]?
             @mapName += @mapRanks[window._eventMapRanks[mapId]]
             realMapName += @realMapRanks[window._eventMapRanks[mapId]]
-          if @finalHP[realMapName]?
+          if @finalHP[realMapName]? && body.api_eventmap?
             if body.api_eventmap.api_now_maphp <= @finalHP[realMapName] && body.api_eventmap.api_now_maphp > 0
               @mapName += __ 'Final'
               event = new CustomEvent 'poi.map-reminder',
