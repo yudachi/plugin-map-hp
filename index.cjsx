@@ -98,7 +98,7 @@ module.exports =
     componentWillUnmount: ->
       window.removeEventListener 'game.response', @handleResponse
     render: ->
-      <div id='map-hp' classname='map-hp'>
+      <div id='map-hp' className='map-hp'>
         <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'map-hp.css')} />
         {
           if @state.mapHp.length == 0
