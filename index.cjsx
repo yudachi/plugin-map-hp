@@ -8,15 +8,7 @@ fs = require 'fs-extra'
 {Table, ProgressBar, Grid, Input, Col, Alert} = ReactBootstrap
 {APPDATA_PATH, SERVER_HOSTNAME} = window
 
-window.i18n.mapHP = new(require 'i18n-2')
-  locales: ['en-US', 'ja-JP', 'zh-CN', 'zh-TW']
-  defaultLocale: 'zh-CN'
-  directory: path.join(__dirname, 'assets', 'i18n')
-  updateFiles: false
-  indent: '\t'
-  extension: '.json'
-window.i18n.mapHP.setLocale(window.language)
-__ = window.i18n.mapHP.__.bind(window.i18n.mapHP)
+__ = window.i18n["poi-plugin-map-hp"].__.bind(window.i18n["poi-plugin-map-hp"])
 
 window.addEventListener 'layout.change', (e) ->
   {layout} = e.detail
@@ -30,13 +22,6 @@ getHpStyle = (percent) ->
   else
     'success'
 module.exports =
-  name: 'map-hp'
-  priority: 8
-  displayName: <span><FontAwesome key={0} name='heart' />{' ' + __("Map HP")}</span>
-  description: __("Map HP")
-  version: '1.4.2'
-  author: 'Chiba'
-  link: 'https://github.com/Chibaheit'
   reactClass: React.createClass
     mapRanks: ['', " #{window.i18n.others.__ '丙'}", " #{window.i18n.others.__ '乙'}", " #{window.i18n.others.__ '甲'}"]
     realMapRanks: ['', '-C', '-B', '-A']
@@ -113,7 +98,7 @@ module.exports =
     componentWillUnmount: ->
       window.removeEventListener 'game.response', @handleResponse
     render: ->
-      <div>
+      <div id='map-hp' classname='map-hp'>
         <link rel="stylesheet" href={join(relative(ROOT, __dirname), 'assets', 'map-hp.css')} />
         {
           if @state.mapHp.length == 0

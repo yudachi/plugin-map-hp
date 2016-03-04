@@ -10,12 +10,21 @@
     "type": "git",
     "url": "git+https://github.com/poooi/plugin-map-hp.git"
   },
-  "author": "",
+  "author": {
+    "name": "Chiba",
+    "link": "https://github.com/Chibaheit"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/poooi/plugin-map-hp/issues"
   },
   "homepage": "https://github.com/poooi/plugin-map-hp#readme",
   "dependencies": {
+  },
+  "poiPlugin": {
+    "title": "Map HP",
+    "description": "Map HP",
+    "icon": "fa/heart",
+    "priority": 8
   }
 }
