@@ -1,6 +1,6 @@
 {
   "name": "poi-plugin-map-hp",
-  "version": "1.4.2",
+  "version": "2.0.0",
   "description": "a plugin map hp for poi ##v1.0.0 init ##v1.1.0 add i18n support",
   "main": "index.cjsx",
   "scripts": {
