@@ -1,13 +1,3 @@
-
-#map-hp table td {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#map-hp table tr td {
-  padding-bottom: 0px;
-  border: none;
-}
 #map-hp .progress {
   border-radius: 0px;
   background-color: inherit;
