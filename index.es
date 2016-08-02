@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
 import { readJsonSync } from 'fs-extra'
-import { ProgressBar, Input} from 'react-bootstrap'
+import { ProgressBar, Input } from 'react-bootstrap'
 const { i18n, ROOT } = window
 
 
