@@ -2,9 +2,7 @@ import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
 import { readJsonSync } from 'fs-extra'
-import { Table, ProgressBar, Grid, Input, Col, Alert } from 'react-bootstrap'
-import { createSelector } from 'reselect'
-import memoize from 'fast-memoize'
+import { ProgressBar, Input} from 'react-bootstrap'
 const { i18n, ROOT } = window
 
 
@@ -40,7 +38,7 @@ class MapHpRow extends Component {
           <div className="hp-progress">
             <ProgressBar bsStyle={getHpStyle(res / max * 100)}
                          now={res / max * 100}
-                         label={`${res} / ${max}`}
+                         label={<div style={{position: "absolute", width: '100%'}}>{res} / {max}</div>}
             />
           </div>
         </div>
@@ -51,7 +49,6 @@ class MapHpRow extends Component {
 
 export const reactClass = connect(
   state => ({
-    state,
     $maps: state.const.$maps
   }),
   null, null, { pure: false }
