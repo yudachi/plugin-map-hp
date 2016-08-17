@@ -24,11 +24,13 @@ function getHpStyle(percent) {
 
 class MapHpRow extends Component {
   render() {
-    const {mapInfo: [id, now, max], $maps} = this.props
+    const {mapInfo: [id, now, max, rank], $maps} = this.props
+    const rankTextRaw = ['', '丙', '乙', '甲'][rank]
+    const rankText = rankTextRaw ? ` [${rankTextRaw}]` : ''
     const res = max - now
     const realName = (id > 200 ? '[Event] ' : id % 10 > 4 ? '[Extra] ' : '[Normal] ') +
       `${Math.floor(id / 10)}-${id % 10}` +
-      ` ${$maps[id].api_name}`
+      ` ${$maps[id].api_name}${rankText}`
     return (
       <div>
         <div>
@@ -74,11 +76,12 @@ export const reactClass = connect(
     forEach(maps, (mapInfo) => {
       if (mapInfo != null) {
         if (mapInfo.api_eventmap) {
-          // Activity Map
+          const {api_eventmap} = mapInfo
+          // Event Map
           const currentHp = mapInfo.api_cleared > 0 ?
-            mapInfo.api_eventmap.api_max_maphp :
-            mapInfo.api_eventmap.api_max_maphp - mapInfo.api_eventmap.api_now_maphp
-          totalMapHp.push([mapInfo.api_id, currentHp, mapInfo.api_eventmap.api_max_maphp])
+            api_eventmap.api_max_maphp :
+            api_eventmap.api_max_maphp - api_eventmap.api_now_maphp
+          totalMapHp.push([mapInfo.api_id, currentHp, api_eventmap.api_max_maphp, api_eventmap.api_selected_rank])
         } else {
           if (typeof $maps[mapInfo.api_id].api_required_defeat_count != "undefined" && $maps[mapInfo.api_id].api_required_defeat_count !== null) {
             const currentHp = typeof mapInfo.api_defeat_count != "undefined" && mapInfo.api_defeat_count !== null ?
