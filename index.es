@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
 import { readJsonSync } from 'fs-extra'
+import { forEach } from 'lodash'
 import { ProgressBar, Input } from 'react-bootstrap'
+import shallowCompare from 'react-addons-shallow-compare'
 const { i18n, ROOT } = window
 
 
@@ -22,9 +24,9 @@ function getHpStyle(percent) {
 
 class MapHpRow extends Component {
   render() {
-    let [id, now, max] = this.props.mapInfo
-    let res = max - now
-    let realName = (id > 200 ? '[Event] ' : id % 10 > 4 ? '[Extra] ' : '[Normal] ') +
+    const {mapInfo: [id, now, max], $maps} = this.props
+    const res = max - now
+    const realName = (id > 200 ? '[Event] ' : id % 10 > 4 ? '[Extra] ' : '[Normal] ') +
       `${Math.floor(id / 10)}-${id % 10}` +
       ` ${$maps[id].api_name}`
     return (
@@ -50,24 +52,27 @@ class MapHpRow extends Component {
 export const reactClass = connect(
   state => ({
     $maps: state.const.$maps,
-    maps: state.info.maps
+    maps: state.info.maps,
   }),
   null, null, { pure: false }
 )(class PoiPluginMapHp extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      clearedVisible: false
+      clearedVisible: false,
     }
   }
   handleSetClickValue = () => {
     this.setState({ clearedVisible: !this.state.clearedVisible })
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
   render() {
     const { $maps, maps } = this.props
-    let totalMapHp = []
-    for (const mapInfo of maps) {
-      if (mapInfo !== null) {
+    const totalMapHp = []
+    forEach(maps, (mapInfo) => {
+      if (mapInfo != null) {
         if (mapInfo.api_eventmap) {
           // Activity Map
           const currentHp = mapInfo.api_cleared > 0 ?
@@ -83,17 +88,16 @@ export const reactClass = connect(
           }
         }
       }
-    }
-    let mapHp = []
-    for (const mapInfo of totalMapHp) {
-      let [id, now, max] = mapInfo
-      let res = max - now
+    })
+    const mapHp = totalMapHp.filter((mapInfo) => {
+      const [id, now, max] = mapInfo
+      const res = max - now
       if ((res == 0 && id % 10 < 5) ||
           (!this.state.clearedVisible && res == 0)) {
-        continue
+        return false
       }
-      mapHp.push(mapInfo)
-    }
+      return true
+    })
     return (
       <div id='map-hp' className='map-hp'>
         <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
@@ -105,7 +109,12 @@ export const reactClass = connect(
               <Input type='checkbox' ref='clearedVisible' label={__("Show cleared EO map")} checked={this.state.clearedVisible} onClick={this.handleSetClickValue} />
             </div>
             <div>
-              { mapHp.length != 0 && mapHp.map(mapInfo => React.cloneElement(<MapHpRow mapInfo={mapInfo} $maps={this.props.$maps} />)) }
+              { mapHp.length != 0 && mapHp.map((mapInfo) => {
+                const id = mapInfo[0]
+                return (
+                  <MapHpRow key={id} mapInfo={mapInfo} $maps={$maps} />
+                )
+              })}
             </div>
           </div> }
       </div>

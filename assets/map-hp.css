@@ -1,3 +1,7 @@
+#map-hp .hp-progress {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
 #map-hp .progress {
   border-radius: 0px;
   background-color: inherit;
