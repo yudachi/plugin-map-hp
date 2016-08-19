@@ -8,9 +8,6 @@ import shallowCompare from 'react-addons-shallow-compare'
 const { i18n, ROOT } = window
 
 const mapRanks = ['', ` ${i18n.others.__('丙')}`, ` ${i18n.others.__('乙')}`, ` ${i18n.others.__('甲')}`]
-const realMapRanks = ['', '-C', '-B', '-A']
-
-let sortieRank
 
 const __ = i18n["poi-plugin-map-hp"].__.bind(i18n["poi-plugin-map-hp"])
 
@@ -29,7 +26,7 @@ function getHpStyle(percent) {
 class MapHpRow extends Component {
   render() {
     const {mapInfo: [id, now, max, rank], $maps} = this.props
-    const rankTextRaw = ['', '丙', '乙', '甲'][rank]
+    const rankTextRaw = mapRanks[rank]
     const rankText = rankTextRaw ? ` [${rankTextRaw}]` : ''
     const res = max - now
     const realName = (id > 200 ? '[Event] ' : id % 10 > 4 ? '[Extra] ' : '[Normal] ') +
@@ -66,42 +63,10 @@ export const reactClass = connect(
     super(props)
     this.state = {
       clearedVisible: false,
-      finalHp: readJsonSync(`${__dirname}/assets/finalHP.json`)
     }
   }
   handleSetClickValue = () => {
     this.setState({ clearedVisible: !this.state.clearedVisible })
-  }
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState)
-  }
-  handleResponse = e => {
-    const { path, body } = e.detail
-    switch (path) {
-    case 'api_get_member/mapinfo':
-      sortieRank = null
-      if (body.api_eventmap && body.api_eventmap.api_selected_rank) { sortieRank = body.api_eventmap.api_selected_rank }
-    case '/kcsapi/api_req_map/start':
-      if (sortieRank) {
-        let mapName = `${body.api_maparea_id}-${body.api_mapinfo_no}-${sortieRank}`
-        if (body.api_eventmap.api_now_maphp <= this.finalHP[mapName] && body.api_eventmap.api_now_maphp > 0) {
-          mapName += __('Final')
-          window.dispatchEvent(new CustomEvent('poi.map-reminder', {
-            bubbles: true,
-            cancelable: true,
-            detail: {
-              mapdetail: (i18n.others.__('Sortie area')) + ": " + this.mapName
-            }
-          }))
-        }
-      }
-    }
-  }
-  componentDidMount = () => {
-    window.addEventListener('game.response', this.handleResponse)
-  }
-  componentWillUnmount = () => {
-    window.removeEventListener('game.response', this.handleResponse)
   }
   render() {
     const { $maps, maps } = this.props
@@ -157,3 +122,12 @@ export const reactClass = connect(
     )
   }
 })
+
+export function reducer(state, action) {
+  if (!state) {
+    return {
+      finalHp: readJsonSync(`${__dirname}/assets/finalHP.json`),
+    }
+  }
+  return state
+}
