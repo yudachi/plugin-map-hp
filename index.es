@@ -26,8 +26,7 @@ function getHpStyle(percent) {
 class MapHpRow extends Component {
   render() {
     const {mapInfo: [id, now, max, rank], $maps} = this.props
-    const rankTextRaw = mapRanks[rank]
-    const rankText = rankTextRaw ? ` [${rankTextRaw}]` : ''
+    const rankText = mapRanks[rank] || ''
     const res = max - now
     const realName = (id > 200 ? '[Event] ' : id % 10 > 4 ? '[Extra] ' : '[Normal] ') +
       `${Math.floor(id / 10)}-${id % 10}` +
@@ -126,7 +125,7 @@ export const reactClass = connect(
 export function reducer(state, action) {
   if (!state) {
     return {
-      finalHp: readJsonSync(`${__dirname}/assets/finalHP.json`),
+      finalHps: readJsonSync(`${__dirname}/assets/finalHP.json`),
     }
   }
   return state
