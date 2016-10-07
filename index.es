@@ -68,7 +68,8 @@ export const reactClass = connect(
     this.setState({ clearedVisible: !this.state.clearedVisible })
   }
   render() {
-    const { $maps, maps } = this.props
+    const { $maps } = this.props
+    const maps = this.props.maps['undefined'] ? this.props.maps['undefined'] : this.props.maps
     const totalMapHp = []
     forEach(maps, (mapInfo) => {
       if (mapInfo != null) {
