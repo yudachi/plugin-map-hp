@@ -69,7 +69,7 @@ export const reactClass = connect(
   }
   render() {
     const { $maps } = this.props
-    const maps = this.props.maps['undefined'] ? this.props.maps['undefined'] : this.props.maps
+    const maps = this.props.maps
     const totalMapHp = []
     forEach(maps, (mapInfo) => {
       if (mapInfo != null) {
