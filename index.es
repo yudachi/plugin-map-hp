@@ -70,7 +70,7 @@ export const reactClass = connect(
   render() {
     const { $maps, maps } = this.props
     const totalMapHp = []
-    forEach(maps.api_map_info, (mapInfo) => {
+    forEach(maps, (mapInfo) => {
       if (mapInfo != null) {
         if (mapInfo.api_eventmap) {
           const {api_eventmap} = mapInfo
