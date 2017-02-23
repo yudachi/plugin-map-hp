@@ -30,6 +30,8 @@ const getMapType = (id) => {
   return 'Normal'
 }
 
+// TODO: add fcd to show last sortie line
+
 const MapHpRow = ({ map, $map }) => {
   const { id, now, max, rank } = map
   const rankText = mapRanks[rank] || ''
@@ -55,6 +57,10 @@ const MapHpRow = ({ map, $map }) => {
     </div>
   )
 }
+
+// NOTE: the now in maphp object is the reduced hp, not the same meaning as now_hp
+// chiba loves you!
+// TODO: correct this ambiguous variable during next event
 
 export const reactClass = connect(
   (state, props) => ({
