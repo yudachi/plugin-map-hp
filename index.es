@@ -1,3 +1,6 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable no-underscore-dangle */
+
 import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
@@ -96,9 +99,9 @@ export const reactClass = connect(
             rank: api_eventmap.api_selected_rank,
           })
         } else if ($map && $map.api_required_defeat_count != null) {
-          const currentHp = typeof map.api_defeat_count != 'undefined' && map.api_defeat_count !== null ?
-              map.api_defeat_count :
-              $map.api_required_defeat_count
+          const currentHp = typeof map.api_defeat_count !== 'undefined' && map.api_defeat_count !== null ?
+            map.api_defeat_count :
+            $map.api_required_defeat_count
           totalMapHp.push({
             id: api_id,
             now: currentHp,
@@ -109,7 +112,7 @@ export const reactClass = connect(
     })
     const mapHp = totalMapHp.filter(({ id, now, max }) => {
       const res = max - now
-      if (res == 0 && (id % 10 < 5 || !this.state.clearedVisible)) {
+      if (res === 0 && (id % 10 < 5 || !this.state.clearedVisible)) {
         return false
       }
       return true
@@ -117,9 +120,9 @@ export const reactClass = connect(
     return (
       <div id="map-hp" className="map-hp">
         <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
-        { totalMapHp.length == 0 ?
+        { totalMapHp.length === 0 ?
           <div>{__('Click Sortie to get infromation')}</div>
-        :
+          :
           <div>
             <div style={{ display: 'flex', marginLeft: 15, marginRight: 15 }}>
               <Input
@@ -132,11 +135,11 @@ export const reactClass = connect(
             <div>
               {
                 mapHp.map(map =>
-                  <MapHpRow
+                  (<MapHpRow
                     key={map.id}
                     map={map}
                     $map={$maps[map.id]}
-                  />
+                  />)
                 )
               }
             </div>
