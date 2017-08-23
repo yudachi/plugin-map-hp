@@ -4,25 +4,15 @@
 import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
-import { forEach } from 'lodash'
+import { forEach, isNumber } from 'lodash'
 import { ProgressBar, Input } from 'react-bootstrap'
+import { getHpStyle } from 'views/utils/game-utils'
 
 const { i18n } = window
 
 const mapRanks = ['', ` ${i18n.others.__('丙')}`, ` ${i18n.others.__('乙')}`, ` ${i18n.others.__('甲')}`]
 
 const __ = i18n['poi-plugin-map-hp'].__.bind(i18n['poi-plugin-map-hp'])
-
-const getHpStyle = (percent) => {
-  if (percent <= 25) {
-    return 'danger'
-  } else if (percent <= 50) {
-    return 'warning'
-  } else if (percent <= 75) {
-    return 'info'
-  }
-  return 'success'
-}
 
 const getMapType = (id) => {
   if (id > 200) {
@@ -99,7 +89,7 @@ export const reactClass = connect(
             rank: api_eventmap.api_selected_rank,
           })
         } else if ($map && $map.api_required_defeat_count != null) {
-          const currentHp = typeof map.api_defeat_count !== 'undefined' && map.api_defeat_count !== null ?
+          const currentHp = isNumber(map.api_defeat_count) ?
             map.api_defeat_count :
             $map.api_required_defeat_count
           totalMapHp.push({
@@ -124,7 +114,7 @@ export const reactClass = connect(
           <div>{__('Click Sortie to get infromation')}</div>
           :
           <div>
-            <div style={{ display: 'flex', marginLeft: 15, marginRight: 15 }}>
+            <div>
               <Input
                 type="checkbox"
                 label={__('Show cleared EO map')}
@@ -134,13 +124,13 @@ export const reactClass = connect(
             </div>
             <div>
               {
-                mapHp.map(map =>
-                  (<MapHpRow
+                mapHp.map(map => (
+                  <MapHpRow
                     key={map.id}
                     map={map}
                     $map={$maps[map.id]}
-                  />)
-                )
+                  />
+                ))
               }
             </div>
           </div>
