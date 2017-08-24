@@ -4,7 +4,7 @@
 import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
-import { forEach, isNumber } from 'lodash'
+import { forEach, isNumber, get } from 'lodash'
 import { ProgressBar, Input } from 'react-bootstrap'
 import { getHpStyle } from 'views/utils/game-utils'
 
@@ -140,3 +140,23 @@ export const reactClass = connect(
   }
 })
 
+const handleResponse = (e) => {
+  if (
+    e.detail.path === '/kcsapi/api_port/port' &&
+    get(e.detail.body, 'api_event_object.api_m_flag2') === 1
+  ) {
+    const { toast, success } = window
+    const msg = __('Debuff mechanism has taken effect!')
+    success(msg)
+    toast(msg, { type: 'success', title: __('Map debuff') })
+  }
+}
+
+
+export const pluginDidLoad = () => {
+  window.addEventListener('game.response', handleResponse)
+}
+
+export const pluginWillUnload = () => {
+  window.removeEventListener('game.response', handleResponse)
+}
