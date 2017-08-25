@@ -1,62 +1,65 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable no-underscore-dangle */
+
 import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
-import { readJsonSync } from 'fs-extra'
-import { forEach } from 'lodash'
+import { forEach, isNumber, get } from 'lodash'
 import { ProgressBar, Input } from 'react-bootstrap'
-import shallowCompare from 'react-addons-shallow-compare'
-const { i18n, ROOT } = window
+import { getHpStyle } from 'views/utils/game-utils'
+
+const { i18n } = window
 
 const mapRanks = ['', ` ${i18n.others.__('丙')}`, ` ${i18n.others.__('乙')}`, ` ${i18n.others.__('甲')}`]
 
-const __ = i18n["poi-plugin-map-hp"].__.bind(i18n["poi-plugin-map-hp"])
+const __ = i18n['poi-plugin-map-hp'].__.bind(i18n['poi-plugin-map-hp'])
 
-function getHpStyle(percent) {
-  if (percent <= 25) {
-    return 'danger'
-  } else if (percent <= 50) {
-    return 'warning'
-  } else if (percent <= 75) {
-    return 'info'
-  } else {
-    return 'success'
+const getMapType = (id) => {
+  if (id > 200) {
+    return 'Event'
+  } else if (id % 10 > 4) {
+    return 'Extra'
   }
+  return 'Normal'
 }
 
-class MapHpRow extends Component {
-  render() {
-    const {mapInfo: [id, now, max, rank], $maps} = this.props
-    const rankText = mapRanks[rank] || ''
-    const res = max - now
-    const realName = (id > 200 ? '[Event] ' : id % 10 > 4 ? '[Extra] ' : '[Normal] ') +
-      `${Math.floor(id / 10)}-${id % 10}` +
-      ` ${$maps[id] ? $maps[id].api_name : '???'}${rankText}`
-    return (
+// TODO: add fcd to show last sortie line
+
+const MapHpRow = ({ map, $map }) => {
+  const { id, now, max, rank } = map
+  const rankText = mapRanks[rank] || ''
+  const res = max - now
+  const mapType = getMapType(id)
+  const realName = `[${mapType}] ${Math.floor(id / 10)}-${id % 10} ${$map ? $map.api_name : '???'}${rankText}`
+  return (
+    <div>
       <div>
-        <div>
-          <span>
-            {realName}
-          </span>
-        </div>
-        <div>
-          <div className="hp-progress">
-            <ProgressBar bsStyle={getHpStyle(res / max * 100)}
-                         now={res / max * 100}
-                         label={<div style={{position: "absolute", width: '100%'}}>{res} / {max}</div>}
-            />
-          </div>
+        <span>
+          {realName}
+        </span>
+      </div>
+      <div>
+        <div className="hp-progress">
+          <ProgressBar
+            bsStyle={getHpStyle((res / max) * 100)}
+            now={(res / max) * 100}
+            label={<div style={{ position: 'absolute', width: '100%' }}>{res} / {max}</div>}
+          />
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
+// NOTE: the now in maphp object is the reduced hp, not the same meaning as now_hp
+// chiba loves you!
+// TODO: correct this ambiguous variable during next event
+
 export const reactClass = connect(
-  state => ({
+  (state, props) => ({
     $maps: state.const.$maps,
     maps: state.info.maps,
-  }),
-  null, null, { pure: false }
+  })
 )(class PoiPluginMapHp extends Component {
   constructor(props) {
     super(props)
@@ -68,66 +71,92 @@ export const reactClass = connect(
     this.setState({ clearedVisible: !this.state.clearedVisible })
   }
   render() {
-    const { $maps } = this.props
-    const maps = this.props.maps
+    const { $maps, maps } = this.props
     const totalMapHp = []
-    forEach(maps, (mapInfo) => {
-      if (mapInfo != null) {
-        if (mapInfo.api_eventmap) {
-          const {api_eventmap} = mapInfo
+    forEach(maps, (map) => {
+      if (map != null) {
+        const { api_eventmap, api_id } = map
+        const $map = $maps[map.api_id]
+        if (map.api_eventmap) {
           // Event Map
-          const currentHp = mapInfo.api_cleared > 0 ?
+          const currentHp = map.api_cleared > 0 ?
             api_eventmap.api_max_maphp :
             api_eventmap.api_max_maphp - api_eventmap.api_now_maphp
-          totalMapHp.push([mapInfo.api_id, currentHp, api_eventmap.api_max_maphp, api_eventmap.api_selected_rank])
-        } else {
-          if ($maps[mapInfo.api_id] && $maps[mapInfo.api_id].api_required_defeat_count != null) {
-            const currentHp = typeof mapInfo.api_defeat_count != "undefined" && mapInfo.api_defeat_count !== null ?
-              mapInfo.api_defeat_count :
-              $maps[mapInfo.api_id].api_required_defeat_count
-            totalMapHp.push([mapInfo.api_id, currentHp, $maps[mapInfo.api_id].api_required_defeat_count])
-          }
+          totalMapHp.push({
+            id: api_id,
+            now: currentHp,
+            max: api_eventmap.api_max_maphp,
+            rank: api_eventmap.api_selected_rank,
+          })
+        } else if ($map && $map.api_required_defeat_count != null) {
+          const currentHp = isNumber(map.api_defeat_count) ?
+            map.api_defeat_count :
+            $map.api_required_defeat_count
+          totalMapHp.push({
+            id: api_id,
+            now: currentHp,
+            max: $map.api_required_defeat_count,
+          })
         }
       }
     })
-    const mapHp = totalMapHp.filter((mapInfo) => {
-      const [id, now, max] = mapInfo
+    const mapHp = totalMapHp.filter(({ id, now, max }) => {
       const res = max - now
-      if ((res == 0 && id % 10 < 5) ||
-          (!this.state.clearedVisible && res == 0)) {
+      if (res === 0 && (id % 10 < 5 || !this.state.clearedVisible)) {
         return false
       }
       return true
     })
     return (
-      <div id='map-hp' className='map-hp'>
+      <div id="map-hp" className="map-hp">
         <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
-        { totalMapHp.length == 0 &&
-          <div>{__("Click Sortie to get infromation")}</div> }
-        { totalMapHp.length != 0 &&
+        { totalMapHp.length === 0 ?
+          <div>{__('Click Sortie to get infromation')}</div>
+          :
           <div>
-            <div style={{display: 'flex', marginLeft: 15, marginRight: 15}}>
-              <Input type='checkbox' ref='clearedVisible' label={__("Show cleared EO map")} checked={this.state.clearedVisible} onClick={this.handleSetClickValue} />
+            <div>
+              <Input
+                type="checkbox"
+                label={__('Show cleared EO map')}
+                checked={this.state.clearedVisible}
+                onClick={this.handleSetClickValue}
+              />
             </div>
             <div>
-              { mapHp.length != 0 && mapHp.map((mapInfo) => {
-                const id = mapInfo[0]
-                return (
-                  <MapHpRow key={id} mapInfo={mapInfo} $maps={$maps} />
-                )
-              })}
+              {
+                mapHp.map(map => (
+                  <MapHpRow
+                    key={map.id}
+                    map={map}
+                    $map={$maps[map.id]}
+                  />
+                ))
+              }
             </div>
-          </div> }
+          </div>
+        }
       </div>
     )
   }
 })
 
-export function reducer(state, action) {
-  if (!state) {
-    return {
-      finalHps: readJsonSync(`${__dirname}/assets/finalHP.json`),
-    }
+const handleResponse = (e) => {
+  if (
+    e.detail.path === '/kcsapi/api_port/port' &&
+    get(e.detail.body, 'api_event_object.api_m_flag2') === 1
+  ) {
+    const { toast, success } = window
+    const msg = __('Debuff mechanism has taken effect!')
+    success(msg)
+    toast(msg, { type: 'success', title: __('Map debuff') })
   }
-  return state
+}
+
+
+export const pluginDidLoad = () => {
+  window.addEventListener('game.response', handleResponse)
+}
+
+export const pluginWillUnload = () => {
+  window.removeEventListener('game.response', handleResponse)
 }

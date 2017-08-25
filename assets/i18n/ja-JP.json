@@ -2,5 +2,6 @@
   "Map HP": "海域HPゲージ",
   "Click Sortie to get infromation": "出撃ボタンをクリックすることでデータを表示します",
   "Show cleared EO map": "攻略完了のマップを表示します",
-  "Final": "最終戦"
+  "Debuff mechanism has taken effect!": "ギミック解除は成功しました！",
+  "Map debuff": "ギミック解除"
 }
