@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
 import { forEach, isNumber, get } from 'lodash'
-import { ProgressBar, Input } from 'react-bootstrap'
+import { ProgressBar, Checkbox } from 'react-bootstrap'
 import { getHpStyle } from 'views/utils/game-utils'
 
 const { i18n } = window
@@ -115,12 +115,13 @@ export const reactClass = connect(
           :
           <div>
             <div>
-              <Input
+              <Checkbox
                 type="checkbox"
-                label={__('Show cleared EO map')}
                 checked={this.state.clearedVisible}
                 onClick={this.handleSetClickValue}
-              />
+              >
+                {__('Show cleared EO map')}
+              </Checkbox>
             </div>
             <div>
               {
