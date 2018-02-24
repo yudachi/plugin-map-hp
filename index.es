@@ -10,7 +10,12 @@ import { getHpStyle } from 'views/utils/game-utils'
 
 const { i18n } = window
 
-const mapRanks = ['', ` ${i18n.others.__('丙')}`, ` ${i18n.others.__('乙')}`, ` ${i18n.others.__('甲')}`]
+const mapRanks = {
+  1: i18n.others.__('丁'),
+  2: i18n.others.__('丙'),
+  3: i18n.others.__('乙'),
+  4: i18n.others.__('甲'),
+}
 
 const __ = i18n['poi-plugin-map-hp'].__.bind(i18n['poi-plugin-map-hp'])
 
