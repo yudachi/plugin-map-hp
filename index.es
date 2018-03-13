@@ -107,7 +107,7 @@ export const reactClass = connect(
     })
     const mapHp = totalMapHp.filter(({ id, now, max }) => {
       const res = max - now
-      if (res === 0 && (id % 10 < 5 || !this.state.clearedVisible)) {
+      if (res === 0 && ((id < 100 && id % 10 < 5) || !this.state.clearedVisible)) {
         return false
       }
       return true
