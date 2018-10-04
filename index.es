@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable no-underscore-dangle */
 
 import React, { Component } from 'react'
@@ -9,7 +8,7 @@ import { forEach, isNumber, get } from 'lodash'
 import { ProgressBar, Checkbox } from 'react-bootstrap'
 import { getHpStyle } from 'views/utils/game-utils'
 
-const { i18n } = window
+const { i18n, config } = window
 
 const mapRanks = {
   1: i18n.others.__('丁'),
@@ -77,11 +76,13 @@ MapHpRow.propTypes = {
 export const reactClass = connect(state => ({
   $maps: state.const.$maps,
   maps: state.info.maps,
+  clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
 }))(
   class PoiPluginMapHp extends Component {
     static propTypes = {
       maps: PropTypes.objectOf(PropTypes.object).isRequired,
       $maps: PropTypes.objectOf(PropTypes.object).isRequired,
+      clearedVisible: PropTypes.bool.isRequired,
     }
 
     constructor(props) {
@@ -92,12 +93,12 @@ export const reactClass = connect(state => ({
     }
 
     handleSetClickValue = () => {
-      this.setState(prevState => ({ clearedVisible: !prevState.clearedVisible }))
+      const { clearedVisible } = this.props
+      config.set('plugin.maphp.clearedVisible', !clearedVisible)
     }
 
     render() {
-      const { $maps, maps } = this.props
-      const { clearedVisible } = this.state
+      const { $maps, maps, clearedVisible } = this.props
       const totalMapHp = []
       forEach(maps, map => {
         if (map != null) {
