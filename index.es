@@ -141,7 +141,13 @@ class PoiPluginMapHp extends Component {
       return
     }
 
-    if (e.detail.path === '/kcsapi/api_get_member/mapinfo') {
+    if (
+      [
+        '/kcsapi/api_get_member/mapinfo',
+        '/kcsapi/api_req_map/select_eventmap_rank',
+        '/kcsapi/api_req_map/start',
+      ].includes(e.detail.path)
+    ) {
       this.setState({ time: e.detail.time })
     }
   }
