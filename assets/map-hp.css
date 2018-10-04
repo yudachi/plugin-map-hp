@@ -39,3 +39,12 @@
   width: 100%;
   display: block;
 }
+#map-hp .header {
+  display: flex;
+  align-items: center;
+}
+#map-hp .timestamp {
+  flex: 1;
+  color: gray;
+  text-align: right;
+}

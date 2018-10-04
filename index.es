@@ -110,6 +110,10 @@ class PoiPluginMapHp extends Component {
     t: PropTypes.func.isRequired,
   }
 
+  state = {
+    time: 0,
+  }
+
   componentDidMount = () => {
     window.addEventListener('game.response', this.handleResponse)
   }
@@ -128,6 +132,11 @@ class PoiPluginMapHp extends Component {
       const msg = t('Debuff mechanism has taken effect!')
       success(msg)
       toast(msg, { type: 'success', title: t('Map debuff') })
+      return
+    }
+
+    if (e.detail.path === '/kcsapi/api_get_member/mapinfo') {
+      this.setState({ time: e.detail.time })
     }
   }
 
@@ -138,25 +147,33 @@ class PoiPluginMapHp extends Component {
 
   render() {
     const { maps, clearedVisible, t } = this.props
+    const { time } = this.state
     return (
       <div id="map-hp" className="map-hp">
         <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
-        {size(maps) === 0 ? (
-          <div>{t('Click Sortie to get infromation')}</div>
-        ) : (
+        {size(maps) === 0 && <div>{t('Click Sortie to get infromation')}</div>}
+        <div className="header">
           <div>
-            <div>
-              <Checkbox type="checkbox" checked={clearedVisible} onClick={this.handleSetClickValue}>
-                {t('Show cleared EO map')}
-              </Checkbox>
-            </div>
-            <div>
-              {map(maps, m => (
-                <MapItem key={m.api_id} id={m.api_id} />
-              ))}
-            </div>
+            <Checkbox type="checkbox" checked={clearedVisible} onClick={this.handleSetClickValue}>
+              {t('Show cleared EO map')}
+            </Checkbox>
           </div>
-        )}
+          <div className="timestamp">
+            {time > 0 && (
+              <>
+                {t('Last update')} {new Date(time).toLocaleString()}
+              </>
+            )}
+          </div>
+        </div>
+        <hr />
+        <div>
+          <div>
+            {map(maps, m => (
+              <MapItem key={m.api_id} id={m.api_id} />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

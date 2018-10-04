@@ -1,7 +1,8 @@
 {
-  "Map HP": "海域HPゲージ",
+  "Map HP": "海域 HP ゲージ",
   "Click Sortie to get infromation": "出撃ボタンをクリックすることでデータを表示します",
   "Show cleared EO map": "攻略完了のマップを表示します",
   "Debuff mechanism has taken effect!": "ギミック解除は成功しました！",
-  "Map debuff": "ギミック解除"
+  "Map debuff": "ギミック解除",
+  "Last update": "最終更新時刻"
 }
