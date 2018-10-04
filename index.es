@@ -7,19 +7,19 @@ import { connect } from 'react-redux'
 import { map, get, memoize, size } from 'lodash'
 import { ProgressBar, Checkbox } from 'react-bootstrap'
 import { createSelector } from 'reselect'
+import { translate } from 'react-i18next'
+import { compose } from 'redux'
 
 import { getHpStyle } from 'views/utils/game-utils'
 
-const { i18n, config } = window
+const { config } = window
 
 const mapRanks = {
-  1: i18n.others.__('丁'),
-  2: i18n.others.__('丙'),
-  3: i18n.others.__('乙'),
-  4: i18n.others.__('甲'),
+  1: '丁',
+  2: '丙',
+  3: '乙',
+  4: '甲',
 }
-
-const __ = i18n['poi-plugin-map-hp'].__.bind(i18n['poi-plugin-map-hp'])
 
 const getMapType = id => {
   if (id > 200) {
@@ -41,10 +41,13 @@ const mapInfoSelectorFactory = memoize(id =>
   })),
 )
 
-const MapItem = connect((state, { id }) => ({
-  map: mapInfoSelectorFactory(id)(state),
-  clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
-}))(({ id, map: m, clearedVisible }) => {
+const MapItem = compose(
+  translate(['others']),
+  connect((state, { id }) => ({
+    map: mapInfoSelectorFactory(id)(state),
+    clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
+  })),
+)(({ id, map: m, clearedVisible, t }) => {
   const mapType = getMapType(id)
   const mapId = `${Math.floor(id / 10)}-${id % 10}`
 
@@ -79,7 +82,7 @@ const MapItem = connect((state, { id }) => ({
       <div>
         <span>
           [{mapType}] {mapId} {m.api_name || '???'}{' '}
-          {eventMap && mapRanks[eventMap.api_selected_rank]}
+          {eventMap && t(mapRanks[eventMap.api_selected_rank])}
         </span>
       </div>
       <div>
@@ -95,75 +98,70 @@ const MapItem = connect((state, { id }) => ({
   )
 })
 
-export const reactClass = connect(state => ({
+@translate(['poi-plugin-map-hp'])
+@connect(state => ({
   maps: state.info.maps,
   clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
-}))(
-  class PoiPluginMapHp extends Component {
-    static propTypes = {
-      maps: PropTypes.objectOf(PropTypes.object).isRequired,
-      clearedVisible: PropTypes.bool.isRequired,
-    }
+}))
+class PoiPluginMapHp extends Component {
+  static propTypes = {
+    maps: PropTypes.objectOf(PropTypes.object).isRequired,
+    clearedVisible: PropTypes.bool.isRequired,
+    t: PropTypes.func.isRequired,
+  }
 
-    constructor(props) {
-      super(props)
-      this.state = {
-        clearedVisible: false,
-      }
-    }
+  componentDidMount = () => {
+    window.addEventListener('game.response', this.handleResponse)
+  }
 
-    handleSetClickValue = () => {
-      const { clearedVisible } = this.props
-      config.set('plugin.maphp.clearedVisible', !clearedVisible)
-    }
+  componentWillUnmount = () => {
+    window.removeEventListener('game.response', this.handleResponse)
+  }
 
-    render() {
-      const { maps, clearedVisible } = this.props
-      return (
-        <div id="map-hp" className="map-hp">
-          <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
-          {size(maps) === 0 ? (
-            <div>{__('Click Sortie to get infromation')}</div>
-          ) : (
+  handleResponse = e => {
+    const { t } = this.props
+    if (
+      e.detail.path === '/kcsapi/api_port/port' &&
+      get(e.detail.body, 'api_event_object.api_m_flag2') === 1
+    ) {
+      const { toast, success } = window
+      const msg = t('Debuff mechanism has taken effect!')
+      success(msg)
+      toast(msg, { type: 'success', title: t('Map debuff') })
+    }
+  }
+
+  handleSetClickValue = () => {
+    const { clearedVisible } = this.props
+    config.set('plugin.maphp.clearedVisible', !clearedVisible)
+  }
+
+  render() {
+    const { maps, clearedVisible, t } = this.props
+    return (
+      <div id="map-hp" className="map-hp">
+        <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
+        {size(maps) === 0 ? (
+          <div>{t('Click Sortie to get infromation')}</div>
+        ) : (
+          <div>
             <div>
-              <div>
-                <Checkbox
-                  type="checkbox"
-                  checked={clearedVisible}
-                  onClick={this.handleSetClickValue}
-                >
-                  {__('Show cleared EO map')}
-                </Checkbox>
-              </div>
-              <div>
-                {map(maps, m => (
-                  <MapItem key={m.api_id} id={m.api_id} />
-                ))}
-              </div>
+              <Checkbox type="checkbox" checked={clearedVisible} onClick={this.handleSetClickValue}>
+                {t('Show cleared EO map')}
+              </Checkbox>
             </div>
-          )}
-        </div>
-      )
-    }
-  },
-)
-
-const handleResponse = e => {
-  if (
-    e.detail.path === '/kcsapi/api_port/port' &&
-    get(e.detail.body, 'api_event_object.api_m_flag2') === 1
-  ) {
-    const { toast, success } = window
-    const msg = __('Debuff mechanism has taken effect!')
-    success(msg)
-    toast(msg, { type: 'success', title: __('Map debuff') })
+            <div>
+              {map(maps, m => (
+                <MapItem key={m.api_id} id={m.api_id} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
   }
 }
 
-export const pluginDidLoad = () => {
-  window.addEventListener('game.response', handleResponse)
-}
+export const reactClass = PoiPluginMapHp
 
-export const pluginWillUnload = () => {
-  window.removeEventListener('game.response', handleResponse)
-}
+export const NAME = 'poi-plugin-map-hp'
