@@ -4,8 +4,10 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
-import { forEach, isNumber, get } from 'lodash'
+import { map, get, memoize, size } from 'lodash'
 import { ProgressBar, Checkbox } from 'react-bootstrap'
+import { createSelector } from 'reselect'
+
 import { getHpStyle } from 'views/utils/game-utils'
 
 const { i18n, config } = window
@@ -29,59 +31,77 @@ const getMapType = id => {
   return 'Normal'
 }
 
-// TODO: add fcd to show last sortie line
+const constMapsSelector = state => get(state, ['const', '$maps'], {})
+const mapsSelector = state => get(state, ['info', 'maps'], {})
 
-const MapHpRow = ({ map, $map }) => {
-  const { id, now, max, rank } = map
-  const rankText = mapRanks[rank] || ''
-  const res = max - now
+const mapInfoSelectorFactory = memoize(id =>
+  createSelector([constMapsSelector, mapsSelector], (constMaps, maps) => ({
+    ...(constMaps[id] || {}),
+    ...(maps[id] || {}),
+  })),
+)
+
+const MapItem = connect((state, { id }) => ({
+  map: mapInfoSelectorFactory(id)(state),
+  clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
+}))(({ id, map: m, clearedVisible }) => {
   const mapType = getMapType(id)
-  const realName = `[${mapType}] ${Math.floor(id / 10)}-${id % 10} ${
-    $map ? $map.api_name : '???'
-  }${rankText}`
+  const mapId = `${Math.floor(id / 10)}-${id % 10}`
+
+  const eventMap = m.api_eventmap
+
+  if (!eventMap && !m.api_required_defeat_count) {
+    // not a map with hp bar, skip
+    return false
+  }
+
+  if (m.api_cleared && mapType === 'Normal') {
+    return false
+  }
+
+  if (m.api_cleared && !clearedVisible && mapType !== 'Event') {
+    return false
+  }
+
+  let now = 0
+  let max = 1
+
+  if (eventMap) {
+    now = eventMap.api_now_maphp
+    max = eventMap.api_max_maphp
+  } else {
+    now = m.api_cleared ? 0 : m.api_required_defeat_count - m.api_defeat_count
+    max = m.api_required_defeat_count
+  }
+
   return (
     <div>
       <div>
-        <span>{realName}</span>
+        <span>
+          [{mapType}] {mapId} {m.api_name || '???'}{' '}
+          {eventMap && mapRanks[eventMap.api_selected_rank]}
+        </span>
       </div>
       <div>
         <div className="hp-progress">
           <ProgressBar
-            bsStyle={getHpStyle((res / max) * 100)}
-            now={(res / max) * 100}
-            label={<div style={{ position: 'absolute', width: '100%' }}>{`${res} / ${max}`}</div>}
+            bsStyle={getHpStyle((now / max) * 100)}
+            now={(now / max) * 100}
+            label={<div style={{ position: 'absolute', width: '100%' }}>{`${now} / ${max}`}</div>}
           />
         </div>
       </div>
     </div>
   )
-}
-
-MapHpRow.propTypes = {
-  map: PropTypes.shape({
-    id: PropTypes.number,
-    now: PropTypes.number,
-    max: PropTypes.number,
-    rank: PropTypes.number,
-  }).isRequired,
-  $map: PropTypes.shape({
-    api_name: PropTypes.string,
-  }).isRequired,
-}
-
-// NOTE: the now in maphp object is the reduced hp, not the same meaning as now_hp
-// chiba loves you!
-// TODO: correct this ambiguous variable during next event
+})
 
 export const reactClass = connect(state => ({
-  $maps: state.const.$maps,
   maps: state.info.maps,
   clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
 }))(
   class PoiPluginMapHp extends Component {
     static propTypes = {
       maps: PropTypes.objectOf(PropTypes.object).isRequired,
-      $maps: PropTypes.objectOf(PropTypes.object).isRequired,
       clearedVisible: PropTypes.bool.isRequired,
     }
 
@@ -98,47 +118,11 @@ export const reactClass = connect(state => ({
     }
 
     render() {
-      const { $maps, maps, clearedVisible } = this.props
-      const totalMapHp = []
-      forEach(maps, map => {
-        if (map != null) {
-          const { api_eventmap: eventMap, api_id: id } = map
-          const $map = $maps[id]
-          if (eventMap) {
-            // Event Map
-            const currentHp =
-              map.api_cleared > 0
-                ? eventMap.api_max_maphp
-                : eventMap.api_max_maphp - eventMap.api_now_maphp
-            totalMapHp.push({
-              id,
-              now: currentHp,
-              max: eventMap.api_max_maphp,
-              rank: eventMap.api_selected_rank,
-            })
-          } else if ($map && $map.api_required_defeat_count != null) {
-            const currentHp = isNumber(map.api_defeat_count)
-              ? map.api_defeat_count
-              : $map.api_required_defeat_count
-            totalMapHp.push({
-              id,
-              now: currentHp,
-              max: $map.api_required_defeat_count,
-            })
-          }
-        }
-      })
-      const mapHp = totalMapHp.filter(({ id, now, max }) => {
-        const res = max - now
-        if (res === 0 && ((id < 100 && id % 10 < 5) || !clearedVisible)) {
-          return false
-        }
-        return true
-      })
+      const { maps, clearedVisible } = this.props
       return (
         <div id="map-hp" className="map-hp">
           <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
-          {totalMapHp.length === 0 ? (
+          {size(maps) === 0 ? (
             <div>{__('Click Sortie to get infromation')}</div>
           ) : (
             <div>
@@ -152,8 +136,8 @@ export const reactClass = connect(state => ({
                 </Checkbox>
               </div>
               <div>
-                {mapHp.map(map => (
-                  <MapHpRow key={map.id} map={map} $map={$maps[map.id]} />
+                {map(maps, m => (
+                  <MapItem key={m.api_id} id={m.api_id} />
                 ))}
               </div>
             </div>
