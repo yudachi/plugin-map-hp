@@ -1,44 +1,12 @@
-#map-hp {
-  margin: 1em 2em;
+:root {
+  --maphp-blue: #2196F3;
 }
 
-#map-hp .hp-progress {
-  margin-top: 5px;
-  margin-bottom: 10px;
+#map-hp {
+  margin: 0 2em;
 }
-#map-hp .progress {
-  border-radius: 0px;
-  background-color: inherit;
-}
-#map-hp .hp-progress .progress {
-  height: 22px;
-}
-#map-hp .hp-progress .progress .progress-bar {
-  font-size: 13px;
-  line-height: 22px;
-}
-#map-hp .hp-progress .progress {
-  position: relative;
-  margin-bottom: 1px;
-}
-#map-hp .hp-progress .progress-bar span span {
-  position: absolute;
-  width: 100%;
-  display: block;
-}
-#map-hp .table {
-  margin-bottom: 8px;
-}
-#map-hp .alert {
-  background-color: #375a7f;
-  border-color: #375a7f;
-  color: #ffffff;
-}
-#map-hp .progress-bar > span {
-  position: absolute;
-  width: 100%;
-  display: block;
-}
+
+
 #map-hp .header {
   display: flex;
   align-items: center;
@@ -47,4 +15,32 @@
   flex: 1;
   color: gray;
   text-align: right;
+}
+#map-hp .area-label {
+  background-color: var(--maphp-blue);
+  color: white;
+}
+#map-hp .hp {
+  display: flex;
+  margin: 1ex 0 2ex 0;
+  align-items: center;
+}
+#map-hp .hp-value {
+  width: 8em;
+}
+#map-hp .hp-bar {
+  position: relative;
+  width: 100%;
+  height: 16px;
+}
+#map-hp .hp-bar-background {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+#map-hp .hp-bar-current,
+#map-hp .hp-bar-background {
+  width: 100%;
+  height: 100%;
+  transform: skewX(-15deg);
+  position: static;
+  position: absolute;
 }

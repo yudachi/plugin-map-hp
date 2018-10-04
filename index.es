@@ -5,10 +5,11 @@ import PropTypes from 'prop-types'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
 import { map, get, memoize, size } from 'lodash'
-import { ProgressBar, Checkbox } from 'react-bootstrap'
+import { Checkbox, Label } from 'react-bootstrap'
 import { createSelector } from 'reselect'
 import { translate } from 'react-i18next'
 import { compose } from 'redux'
+import cls from 'classnames'
 
 import { getHpStyle } from 'views/utils/game-utils'
 
@@ -77,20 +78,25 @@ const MapItem = compose(
     max = m.api_required_defeat_count
   }
 
+  const percent = Math.floor((now / max) * 100)
+
   return (
     <div>
       <div>
         <span>
-          [{mapType}] {mapId} {m.api_name || '???'}{' '}
+          <Label className="area-label">{mapType}</Label> {mapId} {m.api_name || '???'}{' '}
           {eventMap && t(mapRanks[eventMap.api_selected_rank])}
         </span>
       </div>
-      <div>
-        <div className="hp-progress">
-          <ProgressBar
-            bsStyle={getHpStyle((now / max) * 100)}
-            now={(now / max) * 100}
-            label={<div style={{ position: 'absolute', width: '100%' }}>{`${now} / ${max}`}</div>}
+      <div className="hp">
+        <div className="hp-value">{`${now} / ${max}`}</div>
+        <div className="hp-bar">
+          <div className="hp-bar-background" />
+          <div
+            className={cls('hp-bar-current', `progress-bar-${getHpStyle(percent)}`)}
+            style={{
+              clipPath: `polygon(0 0, ${percent}% 0, ${percent}%  100%, 0 100%)`,
+            }}
           />
         </div>
       </div>
