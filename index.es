@@ -71,8 +71,10 @@ const MapItem = compose(
   let max = 1
 
   if (eventMap) {
-    now = eventMap.api_now_maphp
-    max = eventMap.api_max_maphp
+    // in 2019 winter event update, api_now_maphp and api_max_maphp are not availbale for cleared event maps
+    // setting default values to $map.api_max_maphp and 0
+    now = eventMap.api_now_maphp || 0
+    max = eventMap.api_max_maphp || m.api_max_maphp
   } else {
     now = m.api_cleared ? 0 : m.api_required_defeat_count - m.api_defeat_count
     max = m.api_required_defeat_count
