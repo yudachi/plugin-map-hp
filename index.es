@@ -22,6 +22,15 @@ const mapRanks = {
   4: '甲',
 }
 
+// for some unknown reason timezone lookup could throw Range Error: poooi/poi#2072
+// following codde is to ensure fallback
+let timeZone = ''
+try {
+  ;({ timeZone } = Intl.DateTimeFormat().resolvedOptions())
+} catch (e) {
+  console.error('fail to detect timezone', e)
+}
+
 const getMapType = id => {
   if (id > 200) {
     return 'Event'
@@ -175,7 +184,8 @@ class PoiPluginMapHp extends Component {
           <div className="timestamp">
             {time > 0 && (
               <>
-                {t('Last update')} {new Date(time).toLocaleString()}
+                {t('Last update')}{' '}
+                {timeZone ? new Date(time).toLocaleString() : new Date(time).toString()}
               </>
             )}
           </div>
