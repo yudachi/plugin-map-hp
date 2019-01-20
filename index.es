@@ -38,6 +38,10 @@ const getMapType = id => {
   if (id % 10 > 4) {
     return 'Extra'
   }
+  if ([72].includes(id)) {
+    // new monthly renewed normal map
+    return 'SP Normal'
+  }
   return 'Normal'
 }
 
@@ -72,7 +76,7 @@ const MapItem = compose(
     return false
   }
 
-  if (m.api_cleared && !clearedVisible && mapType !== 'Event') {
+  if (m.api_cleared && m.api_defeat_count === undefined && !clearedVisible && mapType !== 'Event') {
     return false
   }
 
