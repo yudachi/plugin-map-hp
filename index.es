@@ -23,7 +23,7 @@ const mapRanks = {
 }
 
 // for some unknown reason timezone lookup could throw Range Error: poooi/poi#2072
-// following codde is to ensure fallback
+// following code is to ensure fallback
 let timeZone = ''
 try {
   ;({ timeZone } = Intl.DateTimeFormat().resolvedOptions())
