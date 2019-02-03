@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import { join } from 'path-extra'
 import { connect } from 'react-redux'
 import { map, get, memoize, size } from 'lodash'
-import { Checkbox, Label } from 'react-bootstrap'
+import { Switch, Tag } from '@blueprintjs/core'
 import { createSelector } from 'reselect'
 import { translate } from 'react-i18next'
 import { compose } from 'redux'
@@ -102,7 +102,7 @@ const MapItem = compose(
     <div>
       <div>
         <span>
-          <Label className="area-label">{mapType}</Label> {mapId} {m.api_name || '???'}{' '}
+          <Tag className="area-label">{mapType}</Tag> {mapId} {m.api_name || '???'}{' '}
           {eventMap && t(mapRanks[eventMap.api_selected_rank])}
         </span>
       </div>
@@ -170,7 +170,7 @@ class PoiPluginMapHp extends Component {
     }
   }
 
-  handleSetClickValue = () => {
+  handleChangeHiding = () => {
     const { clearedVisible } = this.props
     config.set('plugin.maphp.clearedVisible', !clearedVisible)
   }
@@ -184,9 +184,9 @@ class PoiPluginMapHp extends Component {
         {size(maps) === 0 && <div>{t('Click Sortie to get infromation')}</div>}
         <div className="header">
           <div>
-            <Checkbox type="checkbox" checked={clearedVisible} onClick={this.handleSetClickValue}>
+            <Switch type="checkbox" checked={clearedVisible} onChange={this.handleChangeHiding}>
               {t('Show cleared EO map')}
-            </Checkbox>
+            </Switch>
           </div>
           <div className="timestamp">
             {time > 0 && (
