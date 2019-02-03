@@ -89,7 +89,7 @@ const MapItem = compose(
     now = eventMap.api_now_maphp || 0
     max = eventMap.api_max_maphp || m.api_max_maphp
   } else {
-    now = m.api_cleared ? 0 : m.api_required_defeat_count - m.api_defeat_count
+    now = m.api_defeat_count === undefined ? 0 : m.api_required_defeat_count - m.api_defeat_count
     max = m.api_required_defeat_count
   }
 
