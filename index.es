@@ -49,10 +49,13 @@ const constMapsSelector = state => get(state, ['const', '$maps'], {})
 const mapsSelector = state => get(state, ['info', 'maps'], {})
 
 const mapInfoSelectorFactory = memoize(id =>
-  createSelector([constMapsSelector, mapsSelector], (constMaps, maps) => ({
-    ...(constMaps[id] || {}),
-    ...(maps[id] || {}),
-  })),
+  createSelector(
+    [constMapsSelector, mapsSelector],
+    (constMaps, maps) => ({
+      ...(constMaps[id] || {}),
+      ...(maps[id] || {}),
+    }),
+  ),
 )
 
 const MapItem = compose(
