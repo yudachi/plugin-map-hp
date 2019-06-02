@@ -2,7 +2,6 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { join } from 'path-extra'
 import { connect } from 'react-redux'
 import { map, get, memoize, size } from 'lodash'
 import { Switch, Tag } from '@blueprintjs/core'
@@ -10,6 +9,7 @@ import { createSelector } from 'reselect'
 import { translate } from 'react-i18next'
 import { compose } from 'redux'
 import cls from 'classnames'
+import styled from 'styled-components'
 
 import { getHpStyle } from 'views/utils/game-utils'
 
@@ -58,6 +58,43 @@ const mapInfoSelectorFactory = memoize(id =>
   ),
 )
 
+const AreaLabel = styled(Tag)`
+  && {
+    background-color: ${props => props.theme.BLUE5};
+    color: white;
+  }
+`
+
+const HP = styled.div`
+  display: flex;
+  margin: 1ex 0 2ex 0;
+  align-items: center;
+`
+
+const HPValue = styled.div`
+  width: 8em;
+`
+
+const HPBarContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 16px;
+`
+
+const HPBarBase = styled.div`
+  background-color: rgba(255, 255, 255, 0.1);
+  width: 100%;
+  height: 100%;
+  transform: skewX(-15deg);
+  position: static;
+  position: absolute;
+`
+
+const HPBar = styled(HPBarBase)`
+  clip-path: ${props => `polygon(0 0, ${props.percent}% 0, ${props.percent}%  100%, 0 100%)`};
+  background-color: ${props => `var(--poi-${getHpStyle(props.percent)})`};
+`
+
 const MapItem = compose(
   translate(['others']),
   connect((state, { id }) => ({
@@ -102,25 +139,43 @@ const MapItem = compose(
     <div>
       <div>
         <span>
-          <Tag className="area-label">{mapType}</Tag> {mapId} {m.api_name || '???'}{' '}
+          <AreaLabel className="area-label">{mapType}</AreaLabel> {mapId} {m.api_name || '???'}{' '}
           {eventMap && t(mapRanks[eventMap.api_selected_rank])}
         </span>
       </div>
-      <div className="hp">
-        <div className="hp-value">{`${now} / ${max}`}</div>
-        <div className="hp-bar">
-          <div className="hp-bar-background" />
-          <div
+      <HP className="hp">
+        <HPValue className="hp-value">{`${now} / ${max}`}</HPValue>
+        <HPBarContainer className="hp-bar-container">
+          <HPBarBase className="hp-bar-base" />
+          <HPBar
+            percent={percent}
             className={cls('hp-bar-current', `progress-bar-${getHpStyle(percent)}`)}
-            style={{
-              clipPath: `polygon(0 0, ${percent}% 0, ${percent}%  100%, 0 100%)`,
-            }}
           />
-        </div>
-      </div>
+        </HPBarContainer>
+      </HP>
     </div>
   )
 })
+
+const PluginWrapper = styled.div`
+  margin: 0 2em;
+`
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  height: 3em;
+
+  .bp3-control {
+    margin: 0;
+  }
+`
+
+const Timestamp = styled.div`
+  flex: 1;
+  color: gray;
+  text-align: right;
+`
 
 @translate(['poi-plugin-map-hp'])
 @connect(state => ({
@@ -179,24 +234,25 @@ class PoiPluginMapHp extends Component {
     const { maps, clearedVisible, t } = this.props
     const { time } = this.state
     return (
-      <div id="map-hp" className="map-hp">
-        <link rel="stylesheet" href={join(__dirname, 'assets', 'map-hp.css')} />
+      <PluginWrapper id="map-hp" className="map-hp">
         {size(maps) === 0 && <div>{t('Click Sortie to get infromation')}</div>}
-        <div className="header">
+        <Header className="header">
           <div>
             <Switch type="checkbox" checked={clearedVisible} onChange={this.handleChangeHiding}>
               {t('Show cleared EO map')}
             </Switch>
           </div>
-          <div className="timestamp">
+          <Timestamp className="timestamp">
             {time > 0 && (
               <>
                 {t('Last update')}{' '}
-                {timeZone ? new Date(time).toLocaleString() : new Date(time).toString()}
+                <time>
+                  {timeZone ? new Date(time).toLocaleString() : new Date(time).toString()}
+                </time>
               </>
             )}
-          </div>
-        </div>
+          </Timestamp>
+        </Header>
         <hr />
         <div>
           <div>
@@ -205,7 +261,7 @@ class PoiPluginMapHp extends Component {
             ))}
           </div>
         </div>
-      </div>
+      </PluginWrapper>
     )
   }
 }
