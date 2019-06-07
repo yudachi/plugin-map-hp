@@ -320,7 +320,7 @@ class PoiPluginMapHp extends Component {
       const { toast } = window
       each(limits, (limit, id) => {
         // eslint-disable-next-line camelcase
-        if (limit > maps[id]?.api_eventmap?.api_now_maphp) {
+        if (limit >= maps[id]?.api_eventmap?.api_now_maphp) {
           toast(
             t('Map HP for {{map}} below threshold, please pay attention', {
               map: `${Math.floor(id / 10)}-${id % 10}`,
