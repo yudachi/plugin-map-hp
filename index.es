@@ -143,7 +143,7 @@ const HPIndicator = styled.div`
 `
 
 const MapItem = compose(
-  translate(['others']),
+  translate(['others', 'poi-plugin-map-hp']),
   connect((state, { id }) => ({
     map: mapInfoSelectorFactory(id)(state),
     clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
