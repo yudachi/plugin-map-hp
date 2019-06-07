@@ -1,15 +1,26 @@
 /* eslint-disable no-underscore-dangle */
 
-import React, { Component } from 'react'
+import React, { Component, useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { map, get, memoize, size } from 'lodash'
-import { Switch, Tag } from '@blueprintjs/core'
+import {
+  Switch,
+  Tag,
+  Button,
+  Intent,
+  Popover,
+  NumericInput,
+  Position,
+  Classes,
+  FormGroup,
+} from '@blueprintjs/core'
 import { createSelector } from 'reselect'
 import { translate } from 'react-i18next'
 import { compose } from 'redux'
 import cls from 'classnames'
 import styled from 'styled-components'
+import FA from 'react-fontawesome'
 
 import { getHpStyle } from 'views/utils/game-utils'
 
@@ -65,6 +76,31 @@ const AreaLabel = styled(Tag)`
   }
 `
 
+const MapTitle = styled.div`
+  display: flex;
+  align-items: center;
+`
+
+const MapName = styled.div`
+  flex: 1;
+`
+
+const SettingsContainer = styled.div`
+  padding: 8px;
+`
+
+const SettingsControl = styled.div`
+  text-align: right;
+
+  button {
+    width: 3em;
+  }
+
+  button + button {
+    margin-left: 1em;
+  }
+`
+
 const HP = styled.div`
   display: flex;
   margin: 1ex 0 2ex 0;
@@ -95,13 +131,25 @@ const HPBar = styled(HPBarBase)`
   background-color: ${props => `var(--poi-${getHpStyle(props.percent)})`};
 `
 
+const HPIndicator = styled.div`
+  width: 2px;
+  height: 20px;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.75);
+  transform: skewX(-15deg);
+
+  left: ${props => props.percent}%;
+  top: -2px;
+`
+
 const MapItem = compose(
   translate(['others']),
   connect((state, { id }) => ({
     map: mapInfoSelectorFactory(id)(state),
     clearedVisible: get(state.config, 'plugin.maphp.clearedVisible', false),
+    limit: get(state.config, ['plugin', 'maphp', 'limits', id], 0),
   })),
-)(({ id, map: m, clearedVisible, t }) => {
+)(({ id, map: m, clearedVisible, limit, t }) => {
   const mapType = getMapType(id)
   const mapId = `${Math.floor(id / 10)}-${id % 10}`
 
@@ -135,14 +183,53 @@ const MapItem = compose(
 
   const percent = Math.floor((now / max) * 100)
 
+  const [mapLimit, setMapLimit] = useState(limit)
+
+  const handleSave = useCallback(() => {
+    config.set(`plugin.maphp.limits.${id}`, mapLimit)
+  }, [id, mapLimit])
+
+  const handleRemove = useCallback(() => {
+    config.set(`plugin.maphp.limits.${id}`, 0)
+    setMapLimit(0)
+  }, [id, setMapLimit])
+
+  const limitPercent = Math.floor((limit / max) * 100)
+
   return (
     <div>
-      <div>
-        <span>
+      <MapTitle>
+        <MapName>
           <AreaLabel className="area-label">{mapType}</AreaLabel> {mapId} {m.api_name || '???'}{' '}
           {eventMap && t(mapRanks[eventMap.api_selected_rank])}
-        </span>
-      </div>
+        </MapName>
+        <Popover position={Position.TOP}>
+          <Button minimal intent={limit > 0 ? Intent.SUCCESS : Intent.NONE}>
+            <FA name="gear" />
+          </Button>
+          <SettingsContainer>
+            <FormGroup inline label={t('Threshold')}>
+              <NumericInput value={mapLimit} onValueChange={value => setMapLimit(value)} />
+            </FormGroup>
+            <SettingsControl>
+              <Button
+                intent={Intent.SUCCESS}
+                className={Classes.POPOVER_DISMISS}
+                onClick={handleSave}
+              >
+                <FA name="check" />
+              </Button>
+              <Button
+                intent={Intent.DANGER}
+                className={Classes.POPOVER_DISMISS}
+                onClick={handleRemove}
+              >
+                <FA name="times" />
+              </Button>
+            </SettingsControl>
+          </SettingsContainer>
+        </Popover>
+      </MapTitle>
       <HP className="hp">
         <HPValue className="hp-value">{`${now} / ${max}`}</HPValue>
         <HPBarContainer className="hp-bar-container">
@@ -151,6 +238,7 @@ const MapItem = compose(
             percent={percent}
             className={cls('hp-bar-current', `progress-bar-${getHpStyle(percent)}`)}
           />
+          {limit > 0 && <HPIndicator percent={limitPercent} />}
         </HPBarContainer>
       </HP>
     </div>
