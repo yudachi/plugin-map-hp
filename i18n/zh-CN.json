@@ -4,5 +4,8 @@
   "Show cleared EO map": "显示已攻略 EX 图",
   "Debuff mechanism has taken effect!": "削弱效果已启动！",
   "Map debuff": "海域削弱",
-  "Last update": "上次更新时间"
+  "Last update": "上次更新时间",
+  "Threshold": "阈值",
+  "Last dance": "斩杀预警",
+  "Map HP for {{map}} below threshold, please pay attention": "海域 {{map}} 血量低于设置阈值，请注意"
 }

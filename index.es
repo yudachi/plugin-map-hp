@@ -3,7 +3,7 @@
 import React, { Component, useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { map, get, memoize, size } from 'lodash'
+import { map, get, memoize, size, each, keyBy } from 'lodash'
 import {
   Switch,
   Tag,
@@ -203,32 +203,34 @@ const MapItem = compose(
           <AreaLabel className="area-label">{mapType}</AreaLabel> {mapId} {m.api_name || '???'}{' '}
           {eventMap && t(mapRanks[eventMap.api_selected_rank])}
         </MapName>
-        <Popover position={Position.TOP}>
-          <Button minimal intent={limit > 0 ? Intent.SUCCESS : Intent.NONE}>
-            <FA name="gear" />
-          </Button>
-          <SettingsContainer>
-            <FormGroup inline label={t('Threshold')}>
-              <NumericInput value={mapLimit} onValueChange={value => setMapLimit(value)} />
-            </FormGroup>
-            <SettingsControl>
-              <Button
-                intent={Intent.SUCCESS}
-                className={Classes.POPOVER_DISMISS}
-                onClick={handleSave}
-              >
-                <FA name="check" />
-              </Button>
-              <Button
-                intent={Intent.DANGER}
-                className={Classes.POPOVER_DISMISS}
-                onClick={handleRemove}
-              >
-                <FA name="times" />
-              </Button>
-            </SettingsControl>
-          </SettingsContainer>
-        </Popover>
+        {id > 100 && (
+          <Popover position={Position.TOP}>
+            <Button minimal intent={limit > 0 ? Intent.SUCCESS : Intent.NONE}>
+              <FA name="gear" />
+            </Button>
+            <SettingsContainer>
+              <FormGroup inline label={t('Threshold')}>
+                <NumericInput value={mapLimit} onValueChange={value => setMapLimit(value)} />
+              </FormGroup>
+              <SettingsControl>
+                <Button
+                  intent={Intent.SUCCESS}
+                  className={Classes.POPOVER_DISMISS}
+                  onClick={handleSave}
+                >
+                  <FA name="check" />
+                </Button>
+                <Button
+                  intent={Intent.DANGER}
+                  className={Classes.POPOVER_DISMISS}
+                  onClick={handleRemove}
+                >
+                  <FA name="times" />
+                </Button>
+              </SettingsControl>
+            </SettingsContainer>
+          </Popover>
+        )}
       </MapTitle>
       <HP className="hp">
         <HPValue className="hp-value">{`${now} / ${max}`}</HPValue>
@@ -310,6 +312,26 @@ class PoiPluginMapHp extends Component {
       ].includes(e.detail.path)
     ) {
       this.setState({ time: e.detail.time })
+    }
+
+    if (['/kcsapi/api_get_member/mapinfo'].includes(e.detail.path)) {
+      const limits = config.get('plugin.maphp.limits')
+      const maps = keyBy(e.detail.body.api_map_info, 'api_id')
+      const { toast } = window
+      each(limits, (limit, id) => {
+        // eslint-disable-next-line camelcase
+        if (limit > maps[id]?.api_eventmap?.api_now_maphp) {
+          toast(
+            t('Map HP for {{map}} below threshold, please pay attention', {
+              map: `${Math.floor(id / 10)}-${id % 10}`,
+            }),
+            {
+              type: 'warning',
+              title: t('Last dance'),
+            },
+          )
+        }
+      })
     }
   }
 

@@ -4,5 +4,8 @@
   "Show cleared EO map": "攻略完了のマップを表示します",
   "Debuff mechanism has taken effect!": "ギミック解除は成功しました！",
   "Map debuff": "ギミック解除",
-  "Last update": "最終更新時刻"
+  "Last update": "最終更新時刻",
+  "Threshold": "しきい値",
+  "Last dance": "ラストダンス",
+  "Map HP for {{map}} below threshold, please pay attention": "しきい値以下の {{map}} の HP、注意してください"
 }

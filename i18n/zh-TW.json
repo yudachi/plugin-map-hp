@@ -4,5 +4,8 @@
   "Show captured E0 map": "顯示已攻略 EX 圖",
   "Debuff mechanism has taken effect!": "削弱效果已啓動！",
   "Map debuff": "海域削弱",
-  "Last update": "上次更新時間"
+  "Last update": "上次更新時間",
+  "Threshold": "閾值",
+  "Last dance": "斬殺預警",
+  "Map HP for {{map}} below threshold, please pay attention": "海域 {{map}} 血量低於設置閾值，請注意"
 }
