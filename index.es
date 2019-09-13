@@ -3,7 +3,7 @@
 import React, { Component, useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { map, get, memoize, size, each, keyBy } from 'lodash'
+import { map, get, memoize, size, each, keyBy, startsWith, endsWith } from 'lodash'
 import {
   Switch,
   Tag,
@@ -267,6 +267,38 @@ const Timestamp = styled.div`
   text-align: right;
 `
 
+/*
+  Check network response to see if a debuff flag is contained in it.
+
+  Returns a string for each scenario of triggering sound effect.
+  - 'port': triggers in port scene.
+  - 'battleresult': triggers in battle result scene.
+  - 'airdefense': triggers after an air defense event.
+  - null: nothing detected.
+
+ */
+const checkDebuffFlag = evDetail => {
+  if (evDetail.path === '/kcsapi/api_port/port' &&
+      get(evDetail.body, 'api_event_object.api_m_flag2') === 1
+  ) {
+    return 'port'
+  }
+
+  if (startsWith(evDetail.path, '/kcsapi') &&
+      endsWith(evDetail.path, '/battleresult') &&
+      get(evDetail.body, 'api_m2') === 1) {
+    return 'battleresult'
+  }
+
+  if ((evDetail.path === '/kcsapi/api_req_map/next' ||
+       evDetail.path === '/kcsapi/api_req_map/start') &&
+      get(evDetail.body, 'api_destruction_battle.api_m2') === 1) {
+    return 'airdefense'
+  }
+
+  return null
+}
+
 @translate(['poi-plugin-map-hp'])
 @connect(state => ({
   maps: state.info.maps,
@@ -293,12 +325,14 @@ class PoiPluginMapHp extends Component {
 
   handleResponse = e => {
     const { t } = this.props
-    if (
-      e.detail.path === '/kcsapi/api_port/port' &&
-      get(e.detail.body, 'api_event_object.api_m_flag2') === 1
-    ) {
+
+    const debuffFlag = checkDebuffFlag(e.detail)
+    if (debuffFlag !== null) {
       const { toast, success } = window
-      const msg = t('Debuff mechanism has taken effect!')
+      const msg = t(
+        `Debuff mechanism has taken effect! ({{type}})`,
+        {type: t(`debuff_${debuffFlag}`)}
+      )
       success(msg)
       toast(msg, { type: 'success', title: t('Map debuff') })
       return
