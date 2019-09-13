@@ -278,21 +278,26 @@ const Timestamp = styled.div`
 
  */
 const checkDebuffFlag = evDetail => {
-  if (evDetail.path === '/kcsapi/api_port/port' &&
-      get(evDetail.body, 'api_event_object.api_m_flag2') === 1
+  if (
+    evDetail.path === '/kcsapi/api_port/port' &&
+    get(evDetail.body, 'api_event_object.api_m_flag2') === 1
   ) {
     return 'port'
   }
 
-  if (startsWith(evDetail.path, '/kcsapi') &&
-      endsWith(evDetail.path, '/battleresult') &&
-      get(evDetail.body, 'api_m2') === 1) {
+  if (
+    startsWith(evDetail.path, '/kcsapi') &&
+    endsWith(evDetail.path, '/battleresult') &&
+    get(evDetail.body, 'api_m2') === 1
+  ) {
     return 'battleresult'
   }
 
-  if ((evDetail.path === '/kcsapi/api_req_map/next' ||
-       evDetail.path === '/kcsapi/api_req_map/start') &&
-      get(evDetail.body, 'api_destruction_battle.api_m2') === 1) {
+  if (
+    (evDetail.path === '/kcsapi/api_req_map/next' ||
+      evDetail.path === '/kcsapi/api_req_map/start') &&
+    get(evDetail.body, 'api_destruction_battle.api_m2') === 1
+  ) {
     return 'airdefense'
   }
 
@@ -329,10 +334,7 @@ class PoiPluginMapHp extends Component {
     const debuffFlag = checkDebuffFlag(e.detail)
     if (debuffFlag !== null) {
       const { toast, success } = window
-      const msg = t(
-        `Debuff mechanism has taken effect! ({{type}})`,
-        {type: t(`debuff_${debuffFlag}`)}
-      )
+      const msg = t('debuffMessage', { context: debuffFlag })
       success(msg)
       toast(msg, { type: 'success', title: t('Map debuff') })
       return

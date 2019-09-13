@@ -2,7 +2,8 @@
   "Map HP": "Map HP",
   "Click Sortie to get infromation": "Click Sortie to get infromation",
   "Show cleared EO map": "Show cleared EO map",
-  "debuff_port": "(Port)",
-  "debuff_battleresult": "(Battle Result)",
-  "debuff_airdefense": "(Air Defense)"
+  "debuffMessage_port": "Port: Debuff mechanism has taken effect!",
+  "debuffMessage_battleresult": "Battle Result: Debuff mechanism has taken effect!",
+  "debuffMessage_airdefense": "Air Defense: Debuff mechanism has taken effect!",
+  "debuffMessage": "Debuff mechanism has taken effect!"
 }
