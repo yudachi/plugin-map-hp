@@ -17,5 +17,7 @@ module.exports = {
     'comma-dangle': ['error', 'always-multiline'],
     'no-confusing-arrow': ['error', { allowParens: true }],
     'prettier/prettier': 'error',
+    'react/static-property-placement': 'off',
+    'react/state-in-constructor': 'off',
   },
 }
