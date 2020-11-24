@@ -49,7 +49,7 @@ const getMapType = id => {
   if (id % 10 > 4) {
     return 'Extra'
   }
-  if ([72].includes(id)) {
+  if ([72, 73].includes(id)) {
     // new monthly renewed normal map
     return 'SP Normal'
   }
