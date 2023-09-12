@@ -334,7 +334,15 @@ class PoiPluginMapHp extends Component {
     const debuffFlag = checkDebuffFlag(e.detail)
     if (debuffFlag !== null) {
       const { toast, success } = window
-      const msg = t('debuffMessage', { context: debuffFlag })
+      const d = new Date()
+      const msg = _.join(
+        [
+          t('debuffMessage', { context: debuffFlag }),
+          d.toLocaleDateString(),
+          d.toLocaleTimeString(),
+        ],
+        ' '
+      )
       success(msg)
       toast(msg, { type: 'success', title: t('Map debuff') })
       return
