@@ -9,7 +9,6 @@ import {
   Tag,
   Button,
   Intent,
-  Popover,
   NumericInput,
   Position,
   Classes,
@@ -22,6 +21,7 @@ import cls from 'classnames'
 import styled from 'styled-components'
 import FA from 'react-fontawesome'
 
+import { Popover } from 'views/components/etc/overlay'
 import { getHpStyle } from 'views/utils/game-utils'
 
 const { config } = window
@@ -204,31 +204,35 @@ const MapItem = compose(
           {eventMap && t(mapRanks[eventMap.api_selected_rank])}
         </MapName>
         {id > 100 && (
-          <Popover position={Position.TOP}>
+          <Popover
+            position={Position.TOP}
+            content={
+              <SettingsContainer>
+                <FormGroup inline label={t('Threshold')}>
+                  <NumericInput value={mapLimit} onValueChange={value => setMapLimit(value)} />
+                </FormGroup>
+                <SettingsControl>
+                  <Button
+                    intent={Intent.SUCCESS}
+                    className={Classes.POPOVER_DISMISS}
+                    onClick={handleSave}
+                  >
+                    <FA name="check" />
+                  </Button>
+                  <Button
+                    intent={Intent.DANGER}
+                    className={Classes.POPOVER_DISMISS}
+                    onClick={handleRemove}
+                  >
+                    <FA name="times" />
+                  </Button>
+                </SettingsControl>
+              </SettingsContainer>
+            }
+          >
             <Button minimal intent={limit > 0 ? Intent.SUCCESS : Intent.NONE}>
               <FA name="gear" />
             </Button>
-            <SettingsContainer>
-              <FormGroup inline label={t('Threshold')}>
-                <NumericInput value={mapLimit} onValueChange={value => setMapLimit(value)} />
-              </FormGroup>
-              <SettingsControl>
-                <Button
-                  intent={Intent.SUCCESS}
-                  className={Classes.POPOVER_DISMISS}
-                  onClick={handleSave}
-                >
-                  <FA name="check" />
-                </Button>
-                <Button
-                  intent={Intent.DANGER}
-                  className={Classes.POPOVER_DISMISS}
-                  onClick={handleRemove}
-                >
-                  <FA name="times" />
-                </Button>
-              </SettingsControl>
-            </SettingsContainer>
           </Popover>
         )}
       </MapTitle>
