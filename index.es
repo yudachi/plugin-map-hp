@@ -347,6 +347,15 @@ class PoiPluginMapHp extends Component {
       )
       success(msg)
       toast(msg, { type: 'success', title: t('Map debuff') })
+
+      /*
+        Notification area sometimes scrolls too fast,
+        would be nice to have a confirmation somewhere sticky,
+        like console output.
+       */
+      /* eslint-disable no-console */
+      console.info(msg)
+      /* eslint-enable no-console */
       return
     }
 
